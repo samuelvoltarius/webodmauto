@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # ChiliView Backend API
+  chiliview-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: chiliview-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+      - ./uploads:/app/uploads
+    environment:
+      - DATABASE_URL=sqlite:///app/data/chiliview.db
+      - JWT_SECRET_KEY=your-super-secret-jwt-key-change-in-production
+      - UPLOAD_MAX_SIZE=1073741824  # 1GB in bytes
+      - WEBODM_CLI_PATH=/usr/local/bin/webodm
+    depends_on:
+      - webodm-cli
+    networks:
+      - chiliview-network
+    restart: unless-stopped
+
+  # ChiliView Frontend
+  chiliview-frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: chiliview-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - chiliview-backend
+    networks:
+      - chiliview-network
+    restart: unless-stopped
+
+  # WebODM CLI Service
+  webodm-cli:
+    image: opendronemap/webodm_webapp:latest
+    container_name: webodm-cli
+    volumes:
+      - ./webodm_data:/webodm/app/media
+      - ./uploads:/webodm/uploads
+    environment:
+      - WO_HOST=0.0.0.0
+      - WO_PORT=8080
+      - WO_DEBUG=NO
+    ports:
+      - "8080:8080"
+    networks:
+      - chiliview-network
+    restart: unless-stopped
+
+  # ClamAV Antivirus Scanner
+  clamav:
+    image: clamav/clamav:stable
+    container_name: chiliview-clamav
+    volumes:
+      - ./clamav_data:/var/lib/clamav
+    networks:
+      - chiliview-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: chiliview-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./data/resellers:/var/www/resellers
+    depends_on:
+      - chiliview-frontend
+      - chiliview-backend
+    networks:
+      - chiliview-network
+    restart: unless-stopped
+
+networks:
+  chiliview-network:
+    driver: bridge
+
+volumes:
+  webodm_data:
+  clamav_data:

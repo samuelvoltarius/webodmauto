@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- SEO Meta Tags -->
+  <title>ChiliView - Mehrmandantenfähige Fotoverarbeitungsplattform</title>
+  <meta name="description" content="ChiliView ermöglicht die automatische Verarbeitung von Drohnenaufnahmen zu 3D-Modellen mit WebODM-CLI und Potree-Viewer." />
+  <meta name="keywords" content="Drohne, Fotogrammetrie, 3D-Modell, WebODM, Potree, Punktwolke" />
+  <meta name="author" content="ChiliView Team" />
+  
+  <!-- Open Graph Meta Tags -->
+  <meta property="og:title" content="ChiliView - Fotoverarbeitungsplattform" />
+  <meta property="og:description" content="Automatische Verarbeitung von Drohnenaufnahmen zu 3D-Modellen" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="/" />
+  <meta property="og:image" content="/assets/images/og-image.jpg" />
+  
+  <!-- Twitter Card Meta Tags -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="ChiliView - Fotoverarbeitungsplattform" />
+  <meta name="twitter:description" content="Automatische Verarbeitung von Drohnenaufnahmen zu 3D-Modellen" />
+  <meta name="twitter:image" content="/assets/images/twitter-card.jpg" />
+  
+  <!-- Security Headers -->
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta http-equiv="X-XSS-Protection" content="1; mode=block" />
+  <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
+  
+  <!-- Content Security Policy -->
+  <meta http-equiv="Content-Security-Policy" content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline' 'unsafe-eval';
+    style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+    font-src 'self' https://fonts.gstatic.com;
+    img-src 'self' data: https:;
+    connect-src 'self' https:;
+    frame-src 'none';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+  " />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  
+  <!-- Theme Color -->
+  <meta name="theme-color" content="#3b82f6" />
+  <meta name="msapplication-TileColor" content="#3b82f6" />
+  
+  <!-- Preconnect to External Resources -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  
+  <!-- Preload Critical Resources -->
+  <link rel="modulepreload" href="/src/main.js" />
+  
+  <!-- Loading Styles -->
+  <style>
+    /* Critical CSS for loading screen */
+    #loading-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+    
+    .loading-logo {
+      width: 80px;
+      height: 80px;
+      margin-bottom: 2rem;
+      animation: pulse 2s infinite;
+    }
+    
+    .loading-text {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    
+    .loading-subtitle {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1rem;
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.3);
+      border-top: 3px solid white;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+    
+    /* Hide loading screen when app is ready */
+    .app-ready #loading-screen {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease-out;
+    }
+    
+    /* Ensure app is hidden until ready */
+    #app {
+      opacity: 0;
+      transition: opacity 0.5s ease-in;
+    }
+    
+    .app-ready #app {
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <!-- Skip Link for Accessibility -->
+  <a href="#main-content" class="skip-link">Zum Hauptinhalt springen</a>
+  
+  <!-- Loading Screen -->
+  <div id="loading-screen">
+    <svg class="loading-logo" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="50" cy="50" r="45" stroke="white" stroke-width="2" fill="none" opacity="0.3"/>
+      <path d="M50 10 L70 30 L50 50 L30 30 Z" fill="white"/>
+      <path d="M50 50 L70 70 L50 90 L30 70 Z" fill="white" opacity="0.7"/>
+      <circle cx="50" cy="50" r="8" fill="white"/>
+    </svg>
+    
+    <h1 class="loading-text">ChiliView</h1>
+    <p class="loading-subtitle">Fotoverarbeitungsplattform wird geladen...</p>
+    
+    <div class="loading-spinner"></div>
+  </div>
+  
+  <!-- Main App Container -->
+  <div id="app" role="main" aria-label="ChiliView Anwendung">
+    <!-- Vue.js App wird hier gemountet -->
+  </div>
+  
+  <!-- No JavaScript Fallback -->
+  <noscript>
+    <div style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #f3f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      z-index: 10000;
+    ">
+      <div style="
+        background: white;
+        padding: 2rem;
+        border-radius: 0.5rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        max-width: 400px;
+      ">
+        <h1 style="color: #1f2937; margin-bottom: 1rem;">JavaScript erforderlich</h1>
+        <p style="color: #6b7280; margin-bottom: 1.5rem;">
+          ChiliView benötigt JavaScript, um ordnungsgemäß zu funktionieren. 
+          Bitte aktivieren Sie JavaScript in Ihrem Browser und laden Sie die Seite neu.
+        </p>
+        <button onclick="location.reload()" style="
+          background: #3b82f6;
+          color: white;
+          padding: 0.5rem 1rem;
+          border: none;
+          border-radius: 0.25rem;
+          cursor: pointer;
+        ">
+          Seite neu laden
+        </button>
+      </div>
+    </div>
+  </noscript>
+  
+  <!-- Browser Compatibility Check -->
+  <script>
+    // Check for modern browser features
+    if (!window.fetch || !window.Promise || !window.Map || !window.Set) {
+      document.body.innerHTML = `
+        <div style="
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: #f3f4f6;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+          z-index: 10000;
+        ">
+          <div style="
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+          ">
+            <h1 style="color: #1f2937; margin-bottom: 1rem;">Browser nicht unterstützt</h1>
+            <p style="color: #6b7280; margin-bottom: 1.5rem;">
+              Ihr Browser ist zu alt für ChiliView. Bitte aktualisieren Sie auf eine neuere Version:
+            </p>
+            <ul style="text-align: left; color: #6b7280; margin-bottom: 1.5rem;">
+              <li>Chrome 60+</li>
+              <li>Firefox 55+</li>
+              <li>Safari 12+</li>
+              <li>Edge 79+</li>
+            </ul>
+            <a href="https://browsehappy.com/" target="_blank" style="
+              background: #3b82f6;
+              color: white;
+              padding: 0.5rem 1rem;
+              text-decoration: none;
+              border-radius: 0.25rem;
+              display: inline-block;
+            ">
+              Browser aktualisieren
+            </a>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+  
+  <!-- App Initialization -->
+  <script>
+    // Remove loading screen when app is ready
+    window.addEventListener('load', function() {
+      setTimeout(function() {
+        document.body.classList.add('app-ready');
+        
+        // Remove loading screen after transition
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.remove();
+          }
+        }, 500);
+      }, 1000); // Minimum loading time for better UX
+    });
+    
+    // Error handling
+    window.addEventListener('error', function(e) {
+      console.error('Global Error:', e.error);
+      
+      // Show error message if app fails to load
+      if (!document.body.classList.contains('app-ready')) {
+        setTimeout(function() {
+          const loadingScreen = document.getElementById('loading-screen');
+          if (loadingScreen) {
+            loadingScreen.innerHTML = `
+              <div style="text-align: center; color: white;">
+                <h2 style="margin-bottom: 1rem;">Ladefehler</h2>
+                <p style="margin-bottom: 2rem; opacity: 0.8;">
+                  Die Anwendung konnte nicht geladen werden.
+                </p>
+                <button onclick="location.reload()" style="
+                  background: rgba(255, 255, 255, 0.2);
+                  color: white;
+                  border: 1px solid white;
+                  padding: 0.5rem 1rem;
+                  border-radius: 0.25rem;
+                  cursor: pointer;
+                ">
+                  Neu laden
+                </button>
+              </div>
+            `;
+          }
+        }, 5000);
+      }
+    });
+    
+    // Performance monitoring
+    if ('performance' in window) {
+      window.addEventListener('load', function() {
+        setTimeout(function() {
+          const perfData = performance.getEntriesByType('navigation')[0];
+          if (perfData) {
+            console.log('Page Load Performance:', {
+              domContentLoaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+              loadComplete: perfData.loadEventEnd - perfData.loadEventStart,
+              totalTime: perfData.loadEventEnd - perfData.fetchStart
+            });
+          }
+        }, 0);
+      });
+    }
+  </script>
+  
+  <!-- Vue.js App Script -->
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
