@@ -14,7 +14,18 @@ import uuid
 import shutil
 import asyncio
 from pathlib import Path
-import magic
+# Windows-kompatible magic-Implementierung
+try:
+    import magic
+    MAGIC_AVAILABLE = True
+except ImportError:
+    MAGIC_AVAILABLE = False
+    # Fallback für Windows ohne libmagic
+    class MockMagic:
+        @staticmethod
+        def from_file(path, mime=True):
+            return "image/jpeg"  # Fallback für Bilder
+    magic = MockMagic()
 import hashlib
 
 from auth.auth_handler import require_user, get_current_user
@@ -493,18 +504,23 @@ async def upload_files(
                     content = await file.read()
                     buffer.write(content)
                 
-                # Dateityp mit python-magic verifizieren
-                try:
-                    file_type = magic.from_file(str(file_path), mime=True)
-                    if not file_type.startswith('image/'):
-                        os.remove(file_path)
-                        raise HTTPException(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            detail=f"Datei ist kein gültiges Bild: {file.filename}"
-                        )
-                except:
-                    # Falls python-magic nicht verfügbar, Dateierweiterung vertrauen
-                    pass
+                # Dateityp mit python-magic verifizieren (Windows-kompatibel)
+                if MAGIC_AVAILABLE:
+                    try:
+                        file_type = magic.from_file(str(file_path), mime=True)
+                        if not file_type.startswith('image/'):
+                            os.remove(file_path)
+                            raise HTTPException(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                detail=f"Datei ist kein gültiges Bild: {file.filename}"
+                            )
+                    except Exception as e:
+                        logger.warning(f"Magic-Dateityp-Prüfung fehlgeschlagen: {str(e)}")
+                        # Fallback: Dateierweiterung vertrauen
+                        pass
+                else:
+                    # Windows-Fallback: Nur Dateierweiterung prüfen
+                    logger.debug("Magic nicht verfügbar, verwende Dateierweiterung für Validierung")
                 
                 # Datei-Hash berechnen
                 file_hash = hashlib.sha256()
