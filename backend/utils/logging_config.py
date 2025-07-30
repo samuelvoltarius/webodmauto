@@ -87,10 +87,9 @@ def setup_logging():
     error_handler.setFormatter(file_formatter)
     audit_handler.setFormatter(file_formatter)
     
-    # Root Logger konfigurieren
+    # Root Logger konfigurieren (ohne stream, da handlers verwendet werden)
     logging.basicConfig(
         format="%(message)s",
-        stream=sys.stdout,
         level=getattr(logging, log_level),
         handlers=[console_handler, file_handler, error_handler]
     )

@@ -2,6 +2,7 @@
   "name": "chiliview-frontend",
   "version": "1.0.0",
   "description": "ChiliView Frontend - Mehrmandantenfähige Fotoverarbeitungsplattform",
+  "type": "module",
   "private": true,
   "scripts": {
     "dev": "vite",
