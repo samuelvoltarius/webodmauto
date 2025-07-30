@@ -30,7 +30,7 @@ class Admin(Base):
     last_login = Column(DateTime(timezone=True))
     
     # Beziehungen
-    audit_logs = relationship("AuditLog", back_populates="admin")
+    audit_logs = relationship("AuditLog", back_populates="admin", foreign_keys="AuditLog.admin_id")
 
 class Reseller(Base):
     """

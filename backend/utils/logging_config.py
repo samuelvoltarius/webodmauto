@@ -4,6 +4,7 @@ Strukturiertes Logging mit structlog für bessere Nachverfolgbarkeit
 """
 
 import logging
+import logging.handlers
 import structlog
 import sys
 from pathlib import Path
